@@ -294,6 +294,16 @@ component extends=testbox.system.BaseSpec {
                     } ).toThrow( 'jwtcfml.NotBeforeException' );
                 } );
 
+                it( 'verifies the "iat" claim', function() {
+                    var payload = {
+                        iat: dateAdd( 'h', 1, now() )
+                    };
+                    var token = jwt.encode( payload, 'secret', 'HS256' );
+                    expect( function() {
+                        jwt.decode( token, 'secret', 'HS256' );
+                    } ).toThrow( 'jwtcfml.IssuedAtException' );
+                } );
+
                 it( 'verifies the "iss" claim', function() {
                     var token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ0ZXN0VEVTVCJ9.WT1ydOldEYxXVxM91LHwk4gW1fwQMS9zJ3n9SbUbOwE';
                     var key = 'secret';
@@ -314,6 +324,56 @@ component extends=testbox.system.BaseSpec {
                             'HS256',
                             {
                                 'iss': 'testTEST'
+                            }
+                        );
+                    } ).notToThrow();
+                } );
+
+                it( 'verifies the "sub" claim', function() {
+                    var token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0VEVTVCJ9.hsubVFzxiqHzP6tHrdVii7G2nTLZguTImy_2VmwUqkk';
+                    var key = 'secret';
+                    expect( function() {
+                        jwt.decode(
+                            token,
+                            key,
+                            'HS256',
+                            {
+                                'sub': 'testtest'
+                            }
+                        );
+                    } ).toThrow( 'jwtcfml.InvalidSubject' );
+                    expect( function() {
+                        jwt.decode(
+                            token,
+                            key,
+                            'HS256',
+                            {
+                                'sub': 'testTEST'
+                            }
+                        );
+                    } ).notToThrow();
+                } );
+
+                it( 'verifies the "jti" claim', function() {
+                    var token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJ0ZXN0VEVTVCJ9.OE-hXRznlHUZRLzHzeZ6znQfFVMfl0AE1QRa9bJ0Ktw';
+                    var key = 'secret';
+                    expect( function() {
+                        jwt.decode(
+                            token,
+                            key,
+                            'HS256',
+                            {
+                                'jti': 'testtest'
+                            }
+                        );
+                    } ).toThrow( 'jwtcfml.InvalidJwtID' );
+                    expect( function() {
+                        jwt.decode(
+                            token,
+                            key,
+                            'HS256',
+                            {
+                                'jti': 'testTEST'
                             }
                         );
                     } ).notToThrow();
