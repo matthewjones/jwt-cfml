@@ -124,7 +124,8 @@ component {
 
             var baseClaims = {
                 'exp': true,
-                'nbf': true
+                'nbf': true,
+                'iat': true
             };
             baseClaims.append( claims );
             verifyClaims( decoded.payload, baseClaims );
@@ -233,7 +234,16 @@ component {
             );
         }
 
-
+        if (
+            structKeyExists( payload, 'iat' )
+            && !verifyDateClaim( payload.iat, claims.iat, 1 )
+        ) {
+            throw(
+                type = 'jwtcfml.IssuedAtException',
+                message = 'Token is not valid',
+                detail = 'The passed in token has not yet become valid.'
+            );
+        }
 
         if ( structKeyExists( claims, 'iss' ) ) {
             if ( !structKeyExists( payload, 'iss' ) || compare( payload.iss, claims.iss ) != 0 ) {
@@ -245,6 +255,16 @@ component {
             }
         }
 
+        if ( structKeyExists( claims, 'sub' ) ) {
+            if ( !structKeyExists( payload, 'sub' ) || compare( payload.sub, claims.sub ) != 0 ) {
+                throw(
+                    type = 'jwtcfml.InvalidSubject',
+                    message = 'Token has an invalid subject',
+                    detail = 'The passed in token either does not specify a subject or the claimed subject is not valid.'
+                );
+            }
+        }
+
         if ( structKeyExists( claims, 'aud' ) ) {
             var audArray = isArray( claims.aud ) ? claims.aud : [ claims.aud ];
             if ( !structKeyExists( payload, 'aud' ) || !audArray.find( payload.aud ) ) {
@@ -252,6 +272,16 @@ component {
                     type = 'jwtcfml.InvalidAudience',
                     message = 'Token has an invalid audience',
                     detail = 'The passed in token either does not specify an audience or the claimed audience is not valid.'
+                );
+            }
+        }
+
+        if ( structKeyExists( claims, 'jti' ) ) {
+            if ( !structKeyExists( payload, 'jti' ) || compare( payload.jti, claims.jti ) != 0 ) {
+                throw(
+                    type = 'jwtcfml.InvalidJwtId',
+                    message = 'Token has an invalid JWT ID',
+                    detail = 'The passed in token either does not specify a JWT ID or the claimed JWT ID is not valid.'
                 );
             }
         }

@@ -159,20 +159,22 @@ header = jwt.getHeader(token);
 
 #### Token validity
 
-If a token signature is invalid, the `jwt.decode()` method will throw an error. Further, if the payload contains a `"exp"` or `"nbf"` claim these will be verified as well.
+If a token signature is invalid, the `jwt.decode()` method will throw an error. Further, if the payload contains the registered claim names `"iat"`, `"exp"`, or `"nbf"`, these will be verified as well, (functionally, `"iat"` and `"nbf"` are similar).
 
-If you also wish to verify an audience or issuer claim, you can pass valid claims into the decode method:
+If you wish to verify other registered claim names (issuer, subject, audience, or JWT ID), you can pass valid claims into the decode method :
 
 ```cfc
 claims = {
-    "iss": "somissuer",
-    "aud": "someaudience" // this can also be an array
+    "iss": "someissuer",
+    "sub": "somesubject",
+    "aud": "someaudience", // this can also be an array
+    "jti": "somejwtid"
 };
 
 payload = jwt.decode(token, pemCertificate, 'RS256', claims);
 ```
 
-This argument can also be used to ignore the `"exp"` and `"nbf"` claims or to validate them against a timestamp other than the current time:
+This argument can also be used to ignore the `"iat"`, `"exp"`, or `"nbf"` claims or to validate them against a timestamp other than the current time:
 
 ```cfc
 claims = {
